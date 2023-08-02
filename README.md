@@ -1,66 +1,179 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+composer create-project laravel/laravel example-app
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+server-side
+$composer require inertiajs/inertia-laravel
+$php artisan inertia:middleware
+kernel web :
+ \App\Http\Middleware\HandleInertiaRequests::class,
 
-## About Laravel
+client-side
+npm install @inertiajs/vue3
+appjs :
+import { createApp, h } from 'vue'
+import { createInertiaApp, Link, Head } from '@inertiajs/vue3'
+// Vuetify
+import 'vuetify/styles'
+import 'material-design-icons-iconfont/dist/material-design-icons.css'
+import '@mdi/font/css/materialdesignicons.css'
+import { createVuetify } from 'vuetify'
+import { aliases, md } from 'vuetify/iconsets/md'
+import { mdi } from 'vuetify/iconsets/mdi'
+import * as components from 'vuetify/components'
+import * as directives from 'vuetify/directives'
+const vuetify = createVuetify({
+    components,
+    directives,
+    icons: {
+        defaultSet: 'md',
+        aliases,
+        sets: {
+        md,
+        sets: {
+            mdi,
+          },
+        },
+      },
+   })
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+createInertiaApp({
+  resolve: name => {
+    const pages = import.meta.glob('./Pages/**/*.vue', { eager: true })
+    return pages[`./Pages/${name}.vue`]
+  },
+  setup({ el, App, props, plugin }) {
+    createApp({ render: () => h(App, props) })
+      .component('Link', Link)
+      .component('Head', Head)
+      .use(plugin)
+      .use(vuetify)
+      .mount(el)
+  },
+})
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+buat view : 
+	@vite('resources/js/app.css')
+    	@inertiaHead
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
-## Learning Laravel
+tambahkan folder "Pages" dan buat file .vue didalamnya
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+buat controller home
+pada route web.php
+sambungkan dengan use App\Controller\nama_controller
+buat routenya
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+controller home 
+sambungkan inertia\inertia;
+panggil dengan inertia::render('home');
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+add ext
+Laravel Extension Pack	
 
-## Laravel Sponsors
+selanjutnya install vue
+terminal: npm install vue@next vue-loader@next
+terminak: npm i @vitejs/plugin-vue
+terminal: npm i material-design-icons-iconfont
+terminal: npm i @mdi/js
+terminal: npm i @mdi/font
+ 
+tambahkan di vite.conf.js
+import vue from '@vitejs/plugin-vue'
+plugins: [
+vue(), 
+terimnal: npm run dev
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+install vuetify
+terminal : npm inatall vuetify@^3.3.9
 
-### Premium Partners
+membuat middleware 
+php spark make::middleware nama_middleware
+isi middleware yg dibuat
+public function handle(Request $request, Closure $next, $level): Response
+    {
+        $allowedLevel = explode ('|', $level);
+        if  (in_array($request->user()->level, $allowedLevel)) {
+            return $next($request);
+        }
+        return redirect('/');
+    }
+isi kernel
+        'level' => \App\Http\Middleware\level::class
+isi route 
+	Route::middleware(['auth','level:admin'])->group(function(){})
+isi controller
+	 if (Auth::attempt(['user_name'=>$request->user_name,'password'=>$request->password, 'level'=>'admin'])){
+            return redirect('/admin');
+	}
+usePage share
+            return array_merge(parent::share($request), [
+                'auth.user' => fn () => $request->user()
+                    ? $request->user()->only('user_name', 'level','password')
+                    : null,
+            ]);
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+	const page = usePage()
+        const user = computed(() => page.props.auth.user)
 
-## Contributing
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+INSTALL PINIA
+npm i pinia 
+tambahkan app.js
+	import { createPinia } from 'pinia'
+const pinia = createPinia()
 
-## Code of Conduct
+setup [ 
+	.use(pinia)
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+buat folder state dan file state
+tambahkan code pada file state.js
+	import {defineStore} from "pinia"
+import axios from "axios"
+export const useKontrol = defineStore('kontrol',{
+    state:()=>({
+        dataMobil : []
+    }),
 
-## Security Vulnerabilities
+    actions:{
+        async getMobil(){
+            await axios.get('/getMobil').then((res)=>{
+                this.dataMobil=res.data
+            })
+        }
+    }
+})
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+scripct {
+import {useKontrol} from 'tempat file nya'}
+const state = useKontrol()
+            onMounted(() => {
+                state.getMobil()
+            })
+UPLOAD GAMBAR
+	<v-file-input label="Gambar mobil" prepend-icon="mdi: mdi-camera" @input="form.gambar = $event.target.files[0]"></v-file-input>
+ router.visit('/admin/mobil',
+            {
+                method:'post',
+                data:{
+                    id:form.id,
+                    nama:form.nama,
+                    jenis:form.jenis,
+                    bahan_bakar:form.bahan_bakar,
+                    harga:form.harga,
+                    jumlah_kursi:form.jumlah_kursi,
+                    status:form.status,
+                    gambar:form.gambar
+                    },
+                    forceFormData: true,
+                    preserveScroll: true,
+                    preserveState:true, 
 
-## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+relasi table
+	$table->id();
+	$table->bigInteger('data_mobil_id')->unsigned();
+	$table->foreign('data_mobil_id')->references('id')->on('data_mobils')->onDelete('cascade')->onUpdate('cascade');
+
+php ti create user 
+User::create(["name"=> "larainfo","email"=>"larainfo@gmail.com","password"=>bcrypt("123456")]);
+
