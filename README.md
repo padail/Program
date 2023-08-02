@@ -68,6 +68,10 @@ panggil dengan inertia::render('home');
 
 add ext
 Laravel Extension Pack	
+vuetify snippets = gaiya
+laravel snippet = minnie lin
+vue vscode snippets
+vue 3 snippet = hallowtree
 
 selanjutnya install vue
 terminal: npm install vue@next vue-loader@next
@@ -148,6 +152,7 @@ const state = useKontrol()
             onMounted(() => {
                 state.getMobil()
             })
+            
 UPLOAD GAMBAR
 	<v-file-input label="Gambar mobil" prepend-icon="mdi: mdi-camera" @input="form.gambar = $event.target.files[0]"></v-file-input>
  router.visit('/admin/mobil',
